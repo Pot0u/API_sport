@@ -1,0 +1,9 @@
+Le site héberger :
+https://mongestionfoot.alwaysdata.net/Projet-PHP-Foot/vue/connexion.php
+
+Nom d'utilisateur : test
+Mot de passe : 1234
+
+s'il y a un probleme avec la connexion
+Aller dans https://mongestionfoot.alwaysdata.net/Projet-PHP-Foot/vue/inscription.php
+Et creer un utilisateur
