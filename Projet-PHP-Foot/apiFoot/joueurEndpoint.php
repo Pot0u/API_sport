@@ -1,6 +1,6 @@
 <?php
-require_once '../modele/joueurModel.php';
-require_once '../config/functions.php';
+require_once '../MVC/modele/joueurModel.php';
+require_once '../MVC/config/functions.php';
 
 $postedData = file_get_contents('php://input'); // Récupère le contenu du corps de la requête
 $data = json_decode($postedData, true); // Décrypte le JSON en tableau associatif
@@ -189,11 +189,20 @@ switch ($http_method) {
 
         $numero_licence = htmlspecialchars($_GET['id']);
 
+        // Check if the player exists
+        $player = getJoueurParLicence($numero_licence);
+        if (!$player) {
+            send_error(404, "Joueur non trouvé");
+            break;
+        }
+
+        // Check if the player has participations
         if (hasParticipations($numero_licence)) {
             send_error(400, "Impossible de supprimer le joueur car il a des participations existantes");
             break;
         }
 
+        // Proceed with deletion
         $result = supprimerJoueur($numero_licence);
 
         if ($result) {

@@ -34,16 +34,18 @@ function set_cors_headers() {
 
 // Fonction pour vérifier le token d'authentification
 function verifierToken() {
-    // Vérifie si l'en-tête d'autorisation est présent dans la requête
-    if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    // Check for Authorization header or alternate header names
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null;
+
+    if (!$authHeader) {
         deliver_response(400, "Requête invalide. Il n'y a pas d'en-tête d'autorisation.");
         exit;
     }
 
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+    error_log("Authorization Header: " . $authHeader); // Debugging
     $token = str_replace("Bearer ", "", $authHeader);
 
-    $ch = curl_init("https://cabinetherite.alwaysdata.net/PROJCABI/apiAuthentification/api_auth/user_auth_v1.php");
+    $ch = curl_init("https://mongestionapiauth.alwaysdata.net/api_auth/user_auth_v1.php");
     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $token"]);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_MAXREDIRS, 10); // Autorise jusqu'à 10 redirections

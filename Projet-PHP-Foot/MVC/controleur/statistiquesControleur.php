@@ -1,5 +1,5 @@
 <?php
-require_once '../modele/statistiquesModel.php';
+require_once dirname(__DIR__) . '/modele/statistiquesModel.php';
 
 function calculerStatistiques() {
     $stats_matchs = getStatistiquesMatchs();

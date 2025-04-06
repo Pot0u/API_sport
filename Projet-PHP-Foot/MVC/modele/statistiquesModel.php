@@ -1,5 +1,5 @@
 <?php
-require_once '../config/bd.php';
+require_once dirname(__DIR__) . '/config/bd.php';
 
 function getStatistiquesMatchs() {
     global $linkpdo;

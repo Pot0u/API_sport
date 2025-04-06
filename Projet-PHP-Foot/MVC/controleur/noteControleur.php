@@ -1,6 +1,6 @@
 <?php
-require_once '../modele/noteModel.php';
-require_once '../modele/joueurModel.php';
+require_once dirname(__DIR__) . '/modele/noteModel.php';
+require_once dirname(__DIR__) . '/modele/joueurModel.php';
 
 function afficherNotesJoueur($numero_licence) {
     return [

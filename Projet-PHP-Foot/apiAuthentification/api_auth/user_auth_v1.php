@@ -1,5 +1,5 @@
 <?php
-require_once '../../config/bd.php';
+require_once 'bd_auth.php';
 require_once 'jwt_utils.php';
 require_once "functions.php";
 

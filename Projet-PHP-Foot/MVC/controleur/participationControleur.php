@@ -1,7 +1,7 @@
 <?php
-require_once '../modele/participationModel.php';
-require_once '../modele/joueurModel.php';
-require_once '../modele/matchModel.php';
+require_once dirname(__DIR__) . '/modele/participationModel.php';
+require_once dirname(__DIR__) . '/modele/joueurModel.php';
+require_once dirname(__DIR__) . '/modele/matchModel.php';
 
 function getJoueursDisponibles() {
     return getJoueursActifs();

@@ -1,6 +1,6 @@
 <?php
 // modele/utilisateurModel.php
-require_once '../config/bd.php';
+require_once dirname(__DIR__) . '/config/bd.php';
 
 //Vérifie si un utilisateur existe déjà dans la base.
 function getUtilisateur($username) {

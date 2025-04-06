@@ -1,7 +1,7 @@
 <?php
 // controleur/joueurControleur.php
 
-require_once '../modele/joueurModel.php';
+require_once dirname(__DIR__) . '/modele/joueurModel.php';
 
 function afficherListeJoueurs() {
     $search = isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '';

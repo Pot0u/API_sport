@@ -1,5 +1,5 @@
 <?php
-require_once '../modele/matchModel.php';
+require_once dirname(__DIR__) . '/modele/matchModel.php';
 
 function afficherListeMatchs() {
     return getMatchs();

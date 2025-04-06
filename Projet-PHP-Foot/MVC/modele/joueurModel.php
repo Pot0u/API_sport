@@ -1,6 +1,6 @@
 <?php
 // modele/joueurModel.php
-require_once '../config/bd.php';
+require_once dirname(__DIR__) . '/config/bd.php';
 
 function getJoueurs($search = '', $statut = '') {
     global $linkpdo;
