@@ -3,8 +3,9 @@ require_once dirname(__DIR__) . '/config/bd.php';
 
 function getNotesJoueur($numero_licence) {
     global $linkpdo;
+    
     $requete = $linkpdo->prepare("
-        SELECT DISTINCT n.*, j.nom, j.prenom 
+        SELECT n.*, j.Nom as nom, j.Prenom as prenom 
         FROM note_personnelle n
         JOIN joueur j ON n.numero_de_licence = j.numero_de_licence
         WHERE n.numero_de_licence = :licence
@@ -17,19 +18,67 @@ function getNotesJoueur($numero_licence) {
 function ajouterNote($numero_licence, $commentaire) {
     global $linkpdo;
     
-    // Generate note ID
-    $requete = $linkpdo->query("SELECT COUNT(*) as count FROM note_personnelle");
-    $count = $requete->fetch(PDO::FETCH_ASSOC)['count'] + 1;
-    $id_note = 'NOTE' . str_pad($count, 3, '0', STR_PAD_LEFT);
+    try {
+        $id_note = genererIdNote();
+        if (!$id_note) {
+            error_log("Failed to generate note ID");
+            return false;
+        }
+        
+        $requete = $linkpdo->prepare("
+            INSERT INTO note_personnelle (Id_note, Commentaire, numero_de_licence) 
+            VALUES (:id, :commentaire, :licence)
+        ");
+        
+        $success = $requete->execute([
+            ':id' => $id_note,
+            ':commentaire' => $commentaire,
+            ':licence' => $numero_licence
+        ]);
+        
+        return $success ? $id_note : false;
+    } catch (PDOException $e) {
+        error_log("PDO Exception in ajouterNote: " . $e->getMessage());
+        return false;
+    }
+}
+
+function getNoteById($id_note) {
+    global $linkpdo;
     
     $requete = $linkpdo->prepare("
-        INSERT INTO note_personnelle (Id_note, Commentaire, numero_de_licence) 
-        VALUES (:id, :commentaire, :licence)
+        SELECT n.*, j.Nom as nom, j.Prenom as prenom 
+        FROM note_personnelle n 
+        JOIN joueur j ON n.numero_de_licence = j.numero_de_licence 
+        WHERE n.Id_note = :id
     ");
+    $requete->execute([':id' => $id_note]);
+    return $requete->fetch(PDO::FETCH_ASSOC);
+}
+
+function genererIdNote() {
+    global $linkpdo;
+    $prefix = "NOTE";
     
-    return $requete->execute([
-        ':id' => $id_note,
-        ':commentaire' => $commentaire,
-        ':licence' => $numero_licence
-    ]);
+    try {
+        $requete = $linkpdo->query("SELECT Id_note FROM note_personnelle ORDER BY Id_note DESC LIMIT 1");
+        if (!$requete) {
+            error_log("Query failed in genererIdNote");
+            return false;
+        }
+        
+        $lastNote = $requete->fetch(PDO::FETCH_ASSOC);
+        
+        if ($lastNote) {
+            $lastNumber = intval(substr($lastNote['Id_note'], 4));
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+        
+        return $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+    } catch (PDOException $e) {
+        error_log("Error in genererIdNote: " . $e->getMessage());
+        return false;
+    }
 }

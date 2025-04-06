@@ -18,30 +18,54 @@ function getMatchById($id) {
 function genererIdMatch() {
     global $linkpdo;
     $prefix = "MATCH";
-    $requete = $linkpdo->query("SELECT COUNT(*) as count FROM match_foot");
-    $count = $requete->fetch(PDO::FETCH_ASSOC)['count'];
-    return $prefix . str_pad($count + 1, 5, '0', STR_PAD_LEFT);
+    
+    // Get the highest existing ID number
+    $requete = $linkpdo->query("SELECT Id_match FROM match_foot ORDER BY Id_match DESC LIMIT 1");
+    $lastMatch = $requete->fetch(PDO::FETCH_ASSOC);
+    
+    if ($lastMatch) {
+        // Extract the numeric part of the last ID
+        $lastNumber = intval(substr($lastMatch['Id_match'], 5));
+        $newNumber = $lastNumber + 1;
+    } else {
+        $newNumber = 1;
+    }
+    
+    return $prefix . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
 }
 
 function ajouterMatch($date_match, $heure_match, $equipe_adverse, $lieu) {
     global $linkpdo;
     
-    $id_match = genererIdMatch();
-    
-    $requete = $linkpdo->prepare("INSERT INTO match_foot 
-        (Id_match, Date_match, Heure_match, Nom_equipe_adverse, Domicile_externe, Resultat_match) 
-        VALUES (:id, :date, :heure, :equipe, :lieu, 'Non joué')");
-        
     try {
-        return $requete->execute([
+        $linkpdo->beginTransaction();
+        
+        $id_match = genererIdMatch();
+        
+        $requete = $linkpdo->prepare("INSERT INTO match_foot 
+            (Id_match, Date_match, Heure_match, Nom_equipe_adverse, Domicile_externe, Resultat_match) 
+            VALUES (:id, :date, :heure, :equipe, :lieu, 'Non joué')");
+            
+        $success = $requete->execute([
             ':id' => $id_match,
             ':date' => $date_match,
             ':heure' => $heure_match,
             ':equipe' => $equipe_adverse,
             ':lieu' => $lieu
         ]);
-    } catch (PDOException $e) {
-        error_log($e->getMessage());
+        
+        if (!$success) {
+            throw new Exception("Échec de l'insertion du match");
+        }
+        
+        $linkpdo->commit();
+        
+        // Return the newly created match data
+        return getMatchById($id_match);
+        
+    } catch (Exception $e) {
+        $linkpdo->rollBack();
+        error_log("Erreur lors de l'ajout du match: " . $e->getMessage());
         return false;
     }
 }
